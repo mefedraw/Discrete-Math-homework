@@ -1,0 +1,284 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <set>
+#include <queue>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <limits>
+#include <algorithm>
+
+using namespace std;
+
+class DSU {
+public:
+    vector<int> parent;
+    vector<int> rang;
+    int size;
+
+    DSU(int _size) {
+        size = _size;
+        parent.resize(size);
+        rang.resize(size);
+        for (int i = 0; i < size; i++) {
+            parent[i] = i;
+            rang[i] = 1;
+        }
+    }
+
+    int find(int v) {
+        if (parent[v] == v) {
+            return v;
+        } else {
+            parent[v] = find(parent[v]);
+            return parent[v];
+        }
+    }
+
+    void unite(int a, int b) {
+        a = find(a);
+        b = find(b);
+        if (rang[a] < rang[b])
+            swap(a, b);
+        parent[b] = a;
+        if (rang[a] == rang[b]) {
+            rang[a] += 1;
+        }
+    }
+};
+
+unordered_map<string, std::vector<string>> graph = {
+        {"Albania",              {"Montenegro",    "Greece",               "Serbia",               "RepublicOfMacedonia"}},
+        {"Andorra",              {"France",        "Spain"}},
+        {"Armenia",              {"Azerbaijan",    "Georgia",              "Turkey"}},
+        {"Austria",              {"Germany",       "CzechRepublic",        "Slovakia",             "Hungary",              "Slovenia",  "Italy",               "Switzerland", "Liechtenstein"}},
+        {"Azerbaijan",           {"Russia",        "Georgia",              "Armenia",              "Turkey"}},
+        {"Belarus",              {"Latvia",        "Lithuania",            "Poland",               "Russia",               "Ukraine"}},
+        {"Belgium",              {"France",        "Luxembourg",           "Germany",              "Netherlands"}},
+        {"BosniaAndHerzegovina", {"Croatia",       "Montenegro",           "Serbia"}},
+        {"Bulgaria",             {"Romania",       "Serbia",               "RepublicOfMacedonia",  "Greece",               "Turkey"}},
+        {"Croatia",              {"Slovenia",      "Hungary",              "Serbia",               "BosniaAndHerzegovina", "Montenegro"}},
+        {"Cyprus",               {}},
+        {"CzechRepublic",        {"Germany",       "Austria",              "Slovakia",             "Poland"}},
+        {"Denmark",              {"Germany"}},
+        {"Estonia",              {"Latvia",        "Russia"}},
+        {"Finland",              {"Sweden",        "Russia",               "Norway"}},
+        {"France",               {"Belgium",       "Luxembourg",           "Germany",              "Switzerland",          "Italy",     "Spain",               "Andorra",     "Monaco"}},
+        {"Germany",              {"Denmark",       "Netherlands",          "Belgium",              "Luxembourg",           "France",    "Switzerland",         "Austria",     "CzechRepublic", "Poland"}},
+        {"Georgia",              {"Russia",        "Azerbaijan",           "Armenia",              "Turkey"}},
+        {"Greece",               {"Albania",       "RepublicOfMacedonia",  "Bulgaria",             "Turkey"}},
+        {"Hungary",              {"Slovakia",      "Ukraine",              "Romania",              "Serbia",               "Croatia",   "Slovenia",            "Austria"}},
+        {"Iceland",              {}},
+        {"RepublicOfIreland",    {"UnitedKingdom"}},
+        {"Italy",                {"France",        "Switzerland",          "Austria",              "Slovenia",             "SanMarino", "VaticanCity"}},
+        {"Latvia",               {"Estonia",       "Lithuania",            "Russia",               "Belarus"}},
+        {"Liechtenstein",        {"Switzerland",   "Austria"}},
+        {"Lithuania",            {"Latvia",        "Belarus",              "Poland",               "Russia"}},
+        {"Luxembourg",           {"Belgium",       "Germany",              "France"}},
+        {"Moldova",              {"Romania",       "Ukraine"}},
+        {"Monaco",               {"France"}},
+        {"Montenegro",           {"Croatia",       "BosniaAndHerzegovina", "Serbia",               "Albania"}},
+        {"Netherlands",          {"Germany",       "Belgium"}},
+        {"RepublicOfMacedonia",  {"Serbia",        "Bulgaria",             "Greece",               "Albania"}},
+        {"Norway",               {"Sweden",        "Finland",              "Russia"}},
+        {"Poland",               {"Germany",       "CzechRepublic",        "Slovakia",             "Ukraine",              "Belarus",   "Lithuania",           "Russia"}},
+        {"Portugal",             {"Spain"}},
+        {"Romania",              {"Hungary",       "Serbia",               "Bulgaria",             "Moldova",              "Ukraine"}},
+        {"Russia",               {"Azerbaijan",    "Norway",               "Finland",              "Estonia",              "Latvia",    "Lithuania",           "Poland",      "Belarus",       "Ukraine", "Georgia"}},
+        {"SanMarino",            {"Italy"}},
+        {"Serbia",               {"Hungary",       "Croatia",              "BosniaAndHerzegovina", "Montenegro",           "Albania",   "RepublicOfMacedonia", "Romania",     "Bulgaria"}},
+        {"Slovakia",             {"CzechRepublic", "Poland",               "Ukraine",              "Hungary",              "Austria"}},
+        {"Slovenia",             {"Austria",       "Italy",                "Hungary",              "Croatia"}},
+        {"Spain",                {"Portugal",      "France",               "Andorra"}},
+        {"Sweden",               {"Norway",        "Finland"}},
+        {"Switzerland",          {"Germany",       "France",               "Italy",                "Austria",              "Liechtenstein"}},
+        {"Turkey",               {"Greece",        "Bulgaria",             "Georgia",              "Armenia",              "Azerbaijan"}},
+        {"Ukraine",              {"Poland",        "Slovakia",             "Hungary",              "Romania",              "Moldova",   "Belarus",             "Russia"}},
+        {"UnitedKingdom",        {"RepublicOfIreland"}},
+        {"VaticanCity",          {"Italy"}}
+};
+
+unordered_map<string, vector<pair<string, int>>> distances = {
+        {"Albania",              {{"Montenegro",        224},  {"Greece",               435},  {"Serbia",               353},  {"RepublicOfMacedonia",  423}}},
+        {"Andorra",              {{"France",            859},  {"Spain",                646}}},
+        {"Armenia",              {{"Azerbaijan",        266},  {"Georgia",              300},  {"Turkey",               1689}}},
+        {"Austria",              {{"Germany",           678},  {"CzechRepublic",        330},  {"Slovakia",             415},  {"Hungary",              243},  {"Slovenia",      379},
+                                                                                                                                                                                        {"Italy",               1119}, {"Switzerland", 727},  {"Liechtenstein", 646}}},
+        {"Azerbaijan",           {{"Russia",            2195}}},
+        {"Belarus",              {{"Latvia",            471},  {"Lithuania",            71},   {"Poland",               547},  {"Russia",               716},  {"Ukraine",       565}}},
+        {"Belgium",              {{"Luxembourg",        213},  {"Germany",              774},  {"Netherlands",          202}}},
+        {"BosniaAndHerzegovina", {{"Croatia",           398},  {"Montenegro",           228},  {"Serbia",               314}}},
+        {"Bulgaria",             {{"Romania",           388},  {"Serbia",               390},  {"RepublicOfMacedonia",  240},  {"Greece",               792},  {"Turkey",        708}}},
+        {"Croatia",              {{"Slovenia",          140},  {"Hungary",              341},  {"Serbia",               320},  {"BosniaAndHerzegovina", 398},  {"Montenegro",    713}}},
+        {"Cyprus",               {}},
+        {"CzechRepublic",        {{"Germany",           352},  {"Austria",              330},  {"Slovakia",             241},  {"Poland",               436}}},
+        {"Denmark",              {{"Germany",           450}}},
+        {"Estonia",              {{"Latvia",            311},  {"Russia",               1040}}},
+        {"Finland",              {{"Sweden",            470},  {"Russia",               1110}, {"Norway",               1059}}},
+        {"France",               {{"Belgium",           493},  {"Luxembourg",           377},  {"Germany",              1049}, {"Switzerland",          654},  {"Italy",         1302}, {"Spain",               1035},
+                                                                                                                                                                                                                       {"Andorra",     433},  {"Monaco",        221}}},
+        {"Georgia",              {{"Russia",            1991}, {"Azerbaijan",           556},  {"Armenia",              275},  {"Turkey",               1030}}},
+        {"Greece",               {{"Albania",           722},  {"RepublicOfMacedonia",  635},  {"Bulgaria",             477},  {"Turkey",               1623}}},
+        {"Hungary",              {{"Slovakia",          170},  {"Ukraine",              1115}, {"Romania",              826},  {"Serbia",               378},  {"Croatia",       342},  {"Slovenia",            461},
+                                                                                                                                                                                                                       {"Austria",     411}}},
+        {"Iceland",              {}},
+        {"RepublicOfIreland",    {{"UnitedKingdom",     1350}}},
+        {"Italy",                {{"France",            960},  {"Switzerland",          853},  {"Austria",              1119}, {"Slovenia",             754},  {"SanMarino",     408},  {"VaticanCity",         3}}},
+        {"Latvia",               {{"Estonia",           311},  {"Lithuania",            285},  {"Russia",               855},  {"Belarus",              71}}},
+        {"Liechtenstein",        {{"Switzerland",       113},  {"Austria",              646}}},
+        {"Lithuania",            {{"Latvia",            140},  {"Belarus",              71},   {"Poland",               446},  {"Russia",               855}}},
+        {"Luxembourg",           {{"Belgium",           191},  {"Germany",              517},  {"France",               459}}},
+        {"Moldova",              {{"Romania",           435},  {"Ukraine",              471}}},
+        {"Monaco",               {{"France",            221}}},
+        {"Montenegro",           {{"Croatia",           715},  {"BosniaAndHerzegovina", 259},  {"Serbia",               421},  {"Albania",              155}}},
+        {"Netherlands",          {{"Germany",           642},  {"Belgium",              202}}},
+        {"RepublicOfMacedonia",  {{"Serbia",            297},  {"Bulgaria",             240},  {"Greece",               635},  {"Albania",              423}}},
+        {"Norway",               {{"Sweden",            552},  {"Finland",              1059}, {"Russia",               3160}}},
+        {"Poland",               {{"Germany",           574},  {"CzechRepublic",        675},  {"Slovakia",             663},  {"Ukraine",              775},  {"Belarus",       541},  {"Lithuania",           445},
+                                                                                                                                                                                                                       {"Russia",      1260}}},
+        {"Portugal",             {{"Spain",             1247}}},
+        {"Romania",              {{"Hungary",           417},  {"Serbia",               383},  {"Bulgaria",             388},  {"Moldova",              432},  {"Ukraine",       913}}},
+        {"Russia",               {{"Azerbaijan",        2400}, {"Norway",               1740}, {"Finland",              892},  {"Estonia",              1040}, {"Latvia",        914},  {"Lithuania",           780},
+                                                                                                                                                                                                                       {"Poland",      1260}, {"Belarus",       716}, {"Ukraine", 870}, {"Georgia", 1991}}},
+        {"SanMarino",            {{"Italy",             433}}},
+        {"Serbia",               {{"Hungary",           378},  {"Croatia",              411},  {"BosniaAndHerzegovina", 314},  {"Montenegro",           421},  {"Albania",       601},
+                                                                                                                                                                                        {"RepublicOfMacedonia", 629},  {"Romania",     611},  {"Bulgaria",      390}}},
+        {"Slovakia",             {{"CzechRepublic",     333},  {"Poland",               662},  {"Ukraine",              1319}, {"Hungary",              200},  {"Austria",       117}}},
+        {"Slovenia",             {{"Austria",           379},  {"Italy",                754},  {"Hungary",              461},  {"Croatia",              140}}},
+        {"Spain",                {{"Portugal",          1419}, {"France",               1035}, {"Andorra",              646}}},
+        {"Sweden",               {{"Norway",            552},  {"Finland",              1932}}},
+        {"Switzerland",          {{"Germany",           120},  {"France",               484},  {"Italy",                852},  {"Austria",              727},  {"Liechtenstein", 113}}},
+        {"Ukraine",              {{"Poland",            773},  {"Slovakia",             1319}, {"Hungary",              1117}, {"Romania",              641},  {"Moldova",       441},  {"Belarus",             565},  {"Russia",      756}}},
+        {"UnitedKingdom",        {{"RepublicOfIreland", 1381}}},
+        {"VaticanCity",          {{"Italy",             3}}}
+
+};
+
+unordered_map<string, int> bfsDiam(string u, string prev, unordered_map<string, vector<string>> &graph) {
+    unordered_map<string, bool> visited;
+    unordered_map<string, int> dist;
+    queue<string> queue;
+    queue.push(u);
+    dist[u] = 0;
+    visited[u] = true;
+    while (!queue.empty()) {
+        string k = queue.front();
+        queue.pop();
+        for (auto i: graph[k]) {
+            if (!visited[i] and i != prev) {
+                visited[i] = true;
+                prev = i;
+                dist[i] = dist[k] + 1;
+                queue.push(i);
+            }
+        }
+    }
+    return dist;
+}
+
+set<pair<string, string>> bridges;
+
+void dfsBridges(unordered_map<string, vector<string>> &graph,
+                string &v, string &parent, int &timer,
+                unordered_map<string, int> &tin,
+                unordered_map<string, int> &up,
+                unordered_map<string, bool> &mark) {
+
+    mark[v] = true;
+    tin[v] = up[v] = timer++;
+    for (auto i: graph[v]) {
+        string &to = i;
+        if (to == parent) {
+            continue;
+        }
+        if (mark[to]) {
+            up[v] = min(up[v], tin[to]);
+        } else {
+            dfsBridges(graph, to, v, timer, tin, up, mark);
+            up[v] = min(up[v], up[to]);
+            if (up[to] > tin[v]) {
+                bridges.insert({v, to});
+            }
+        }
+    }
+}
+
+int main() {
+    string parent = "";
+    string startVert = "Russia";
+    int timer = 0;
+    unordered_map<string, int> tin;
+    unordered_map<string, int> up;
+    unordered_map<string, bool> mark;
+    dfsBridges(graph, startVert, parent, timer, tin, up, mark);
+    cout << "bridges:\n";
+    for (auto i: bridges) {
+        cout << i.first << " " << i.second << "\n";
+    }
+
+    unordered_map<string, int> dist1 = bfsDiam("Portugal", "", graph);
+    string farVert = "";
+    int farINT = -1;
+    for (auto &[str, range]: dist1) {
+        if (farINT < range) {
+            farVert = str;
+            farINT = range;
+        }
+    }
+
+    unordered_map<string, int> dist2 = bfsDiam(farVert, "", graph);
+    int diam = -1;
+    string endCountry = "";
+    for (auto &[str, range]: dist2) {
+        if (diam < range) {
+            diam = range;
+            endCountry = str;
+        }
+    }
+
+    cout << "diametr: " << diam << " " << "from " << farVert << " to " << endCountry << "\n";
+
+
+    vector<pair<int, pair<string, string>>> kruskalVec;
+    unordered_map<string, int> index;
+    vector<pair<string, string>> edgesForInd;
+    for (auto &[from, vec]: graph) {
+        for (auto &to: vec) {
+            edgesForInd.push_back({from, to});
+        }
+    }
+
+    for (auto &[from, vec]: distances) {
+        for (auto [to, dist]: vec) {
+            kruskalVec.push_back({dist, {from, to}});
+        }
+    }
+
+    int ind = 0;
+    for (auto &str: edgesForInd) {
+        if (!index[str.second]) {
+            index[str.second] = ind;
+            ind++;
+        }
+    }
+
+    set<pair<string, string>> mstEdges;
+    DSU dsu(ind);
+    int mstLength = 0;
+    sort(kruskalVec.begin(), kruskalVec.end());
+    for (auto [dist, str]: kruskalVec) {
+        if (dsu.find(index[str.first]) != dsu.find(index[str.second])) {
+            dsu.unite(index[str.first], index[str.second]);
+            mstLength += dist;
+            mstEdges.insert({str.first, str.second});
+        }
+    }
+    cout<<"MST length is " << mstLength << endl;
+
+/*    for (auto i: mstEdges) {
+        cout << i.first << " " << i.second << '\n';
+    }*/
+
+    return 0;
+}
