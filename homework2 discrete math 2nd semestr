@@ -99,6 +99,8 @@ unordered_map<string, std::vector<string>> graph = {
         {"VaticanCity",          {"Italy"}}
 };
 
+auto graphCopy = graph;
+
 unordered_map<string, vector<pair<string, int>>> distances = {
         {"Albania",              {{"Montenegro",        224},  {"Greece",               435},  {"Serbia",               353},  {"RepublicOfMacedonia",  423}}},
         {"Andorra",              {{"France",            859},  {"Spain",                646}}},
@@ -204,7 +206,51 @@ void dfsBridges(unordered_map<string, vector<string>> &graph,
     }
 }
 
+vector<int> parent;
+
+void dfs(int v, vector<vector<int>> &adj) {
+    for (int u: adj[v]) {
+        if (u != parent[v]) {
+            parent[u] = v;
+            dfs(u, adj);
+        }
+    }
+}
+
+void pruefer_code(vector<vector<int>> &adj,unordered_map<int , string> &index) {
+    int n = adj.size();
+    parent.resize(n);
+    parent[n - 1] = -1;
+    dfs(n - 1, adj);
+
+    int ptr = -1;
+    vector<int> degree(n);
+    for (int i = 0; i < n; i++) {
+        degree[i] = adj[i].size();
+        if (degree[i] == 1 && ptr == -1)
+            ptr = i;
+    }
+
+    vector<int> code(n - 2);
+    int leaf = ptr;
+    for (int i = 0; i < n - 2; i++) {
+        int next = parent[leaf];
+        cout << index[next + 1] << " ";
+        if (--degree[next] == 1 && next < ptr) {
+            leaf = next;
+        } else {
+            ptr++;
+            while (degree[ptr] != 1)
+                ptr++;
+            leaf = ptr;
+        }
+    }
+}
+
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
     string parent = "";
     string startVert = "Russia";
     int timer = 0;
@@ -242,6 +288,7 @@ int main() {
 
     vector<pair<int, pair<string, string>>> kruskalVec;
     unordered_map<string, int> index;
+    unordered_map<int, string> antIndex;
     vector<pair<string, string>> edgesForInd;
     for (auto &[from, vec]: graph) {
         for (auto &to: vec) {
@@ -259,11 +306,13 @@ int main() {
     for (auto &str: edgesForInd) {
         if (!index[str.second]) {
             index[str.second] = ind;
+            antIndex[ind] = str.second;
             ind++;
         }
     }
 
     set<pair<string, string>> mstEdges;
+    vector<vector<int>> mstGraph(ind);
     DSU dsu(ind);
     int mstLength = 0;
     sort(kruskalVec.begin(), kruskalVec.end());
@@ -272,13 +321,17 @@ int main() {
             dsu.unite(index[str.first], index[str.second]);
             mstLength += dist;
             mstEdges.insert({str.first, str.second});
+            mstGraph[index[str.first]].push_back(index[str.second]);
+            mstGraph[index[str.second]].push_back(index[str.first]);
         }
     }
-    cout<<"MST length is " << mstLength << endl;
+    cout << "MST length is " << mstLength << endl;
 
-/*    for (auto i: mstEdges) {
+    for (auto i: mstEdges) {
         cout << i.first << " " << i.second << '\n';
-    }*/
+    }
+
+    pruefer_code(mstGraph,antIndex);
 
     return 0;
 }
